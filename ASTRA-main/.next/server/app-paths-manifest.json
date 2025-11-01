@@ -1,16 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/features/analysis/page": "app/features/analysis/page.js",
-  "/features/chatbot/page": "app/features/chatbot/page.js",
-  "/features/deepsearch/page": "app/features/deepsearch/page.js",
-  "/features/optimizer/page": "app/features/optimizer/page.js",
-  "/login/email/page": "app/login/email/page.js",
-  "/jurisdiction/page": "app/jurisdiction/page.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js",
-  "/dashboard/deep-search/page": "app/dashboard/deep-search/page.js",
-  "/dashboard/optimization-assistant/page": "app/dashboard/optimization-assistant/page.js",
-  "/dashboard/legal-chatbot/page": "app/dashboard/legal-chatbot/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/page": "app/page.js"
 }
