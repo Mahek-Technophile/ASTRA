@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { analyzeLegalClauses, AnalyzeLegalClausesOutput } from '@/ai/flows/analyze-legal-clauses';
 import { legalChatbot } from '@/ai/flows/legal-chatbot';
-import { Loader2, FileCode, Bot, Search, ZoomIn, ZoomOut, RotateCw, Upload, Send, Globe } from 'lucide-react';
+import { Loader2, FileCode, Bot, Search, ZoomIn, ZoomOut, RotateCw, Upload, Send, Globe, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -182,6 +182,120 @@ export default function DashboardPage() {
     }
   };
 
+  const formatAnalysisForExport = (result: AnalyzeLegalClausesOutput, fileName: string) => {
+    const lines: string[] = [];
+    lines.push('='.repeat(60));
+    lines.push('DOCUMENT ANALYSIS REPORT');
+    lines.push('='.repeat(60));
+    lines.push('');
+    lines.push(`File: ${fileName || 'Untitled Document'}`);
+    lines.push(`Generated: ${new Date().toLocaleString()}`);
+    lines.push('');
+    lines.push('-'.repeat(60));
+    lines.push('CLAUSE ANALYSIS');
+    lines.push('-'.repeat(60));
+    lines.push('');
+
+    result.clauseAnalysis.forEach((item, index) => {
+      lines.push(`${index + 1}. CLAUSE ANALYSIS`);
+      lines.push(`   Risk Level: ${item.riskLevel.toUpperCase()}`);
+      lines.push('');
+      lines.push(`   Clause:`);
+      lines.push(`   "${item.clause}"`);
+      lines.push('');
+      lines.push(`   Explanation:`);
+      lines.push(`   ${item.explanation}`);
+      lines.push('');
+      lines.push('-'.repeat(60));
+      lines.push('');
+    });
+
+    return lines.join('\n');
+  };
+
+  const downloadAsTxt = () => {
+    if (!analysisResult) return;
+
+    const content = formatAnalysisForExport(analysisResult, fileName);
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileName ? fileName.replace(/\.[^/.]+$/, '') : 'document'}_analysis_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAsPdf = async () => {
+    if (!analysisResult) return;
+
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
+
+      // Helper function to add text with word wrap
+      const addText = (text: string, fontSize: number, isBold: boolean = false) => {
+        doc.setFontSize(fontSize);
+        if (isBold) {
+          doc.setFont(undefined, 'bold');
+        } else {
+          doc.setFont(undefined, 'normal');
+        }
+        
+        const lines = doc.splitTextToSize(text, maxWidth);
+        
+        if (yPosition + (lines.length * fontSize * 0.4) > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        lines.forEach((line: string) => {
+          doc.text(line, margin, yPosition);
+          yPosition += fontSize * 0.4;
+        });
+        
+        yPosition += 2; // Add small spacing
+      };
+
+      // Title
+      addText('DOCUMENT ANALYSIS REPORT', 16, true);
+      addText(`File: ${fileName || 'Untitled Document'}`, 10);
+      addText(`Generated: ${new Date().toLocaleString()}`, 10);
+      yPosition += 5;
+
+      // Analysis items
+      analysisResult.clauseAnalysis.forEach((item, index) => {
+        if (index > 0) {
+          addText('─'.repeat(50), 8);
+        }
+        
+        addText(`${index + 1}. CLAUSE ANALYSIS`, 12, true);
+        addText(`Risk Level: ${item.riskLevel.toUpperCase()}`, 10);
+        yPosition += 3;
+        
+        addText('Clause:', 10, true);
+        addText(`"${item.clause}"`, 9);
+        yPosition += 3;
+        
+        addText('Explanation:', 10, true);
+        addText(item.explanation, 9);
+        yPosition += 5;
+      });
+
+      doc.save(`${fileName ? fileName.replace(/\.[^/.]+$/, '') : 'document'}_analysis_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please make sure jspdf is installed.');
+    }
+  };
+
   const handleMouseDownPanels = (e: React.MouseEvent) => {
     e.preventDefault();
     isResizingPanels.current = true;
@@ -310,6 +424,29 @@ export default function DashboardPage() {
                             </div>
                             ) : analysisResult ? (
                             <div className="space-y-3">
+                                <div className="flex items-center justify-between mb-3 pb-3 border-b">
+                                    <h3 className="font-semibold text-base">Analysis Results</h3>
+                                    <div className="flex gap-2">
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={downloadAsTxt}
+                                            className="text-xs"
+                                        >
+                                            <Download className="h-3 w-3 mr-1" />
+                                            TXT
+                                        </Button>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={downloadAsPdf}
+                                            className="text-xs"
+                                        >
+                                            <Download className="h-3 w-3 mr-1" />
+                                            PDF
+                                        </Button>
+                                    </div>
+                                </div>
                                 {analysisResult.clauseAnalysis.map((item, index) => (
                                 <div key={index} className="p-3 border rounded-md bg-secondary">
                                     <div className="flex items-center justify-between mb-2">
