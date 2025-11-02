@@ -532,7 +532,7 @@ const createConversation = async (title, firstMessage)=>{
                 content: firstMessage.content,
                 fileUrl: firstMessage.fileUrl || null,
                 fileName: firstMessage.fileName || null,
-                timestamp: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["serverTimestamp"])()
+                timestamp: new Date()
             }
         ]
     });
@@ -548,7 +548,7 @@ const addMessageToConversation = async (conversationId, sender, content, fileUrl
             content,
             fileUrl: fileUrl || null,
             fileName: fileName || null,
-            timestamp: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["serverTimestamp"])()
+            timestamp: new Date()
         };
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$node$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["updateDoc"])(conversationRef, {
             messages: [

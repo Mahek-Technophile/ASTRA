@@ -1,0 +1,16 @@
+{
+  "node": {
+    "40874373e336400d43334f4a7c243302380ee580cd": {
+      "workers": {
+        "app/dashboard/legal-chatbot/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/legal-chatbot/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/legal-chatbot.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/dashboard/legal-chatbot/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}

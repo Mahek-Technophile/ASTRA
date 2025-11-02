@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { analyzeLegalClauses, AnalyzeLegalClausesOutput } from '@/ai/flows/analyze-legal-clauses';
 import { legalChatbot } from '@/ai/flows/legal-chatbot';
-import { Loader2, FileCode, Bot, Search, ZoomIn, ZoomOut, RotateCw, Upload, Send, Globe, Download } from 'lucide-react';
+import { Loader2, FileCode, Bot, Search, ZoomIn, ZoomOut, RotateCw, Upload, Send, Download, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -15,6 +15,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useRouter } from 'next/navigation';
 import { maskSensitiveData } from '@/lib/utils';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface AssistantMessage {
     role: 'user' | 'assistant';
@@ -40,6 +49,15 @@ export default function DashboardPage() {
   const [activeAccordionItems, setActiveAccordionItems] = useState(["analysis"]);
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction | null>(null);
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [showDataSecurePopup, setShowDataSecurePopup] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const storedJurisdiction = localStorage.getItem('jurisdiction');
@@ -117,7 +135,7 @@ export default function DashboardPage() {
       setIsLoading(false);
     }
   };
-  
+
   const handleReset = () => {
     setAnalysisResult(null);
     setAssistantMessages([
@@ -350,7 +368,15 @@ export default function DashboardPage() {
       <header className="flex items-center justify-between p-4 border-b bg-background">
           <h1 className="text-xl font-semibold font-serif">Document Workspace</h1>
           <div className="flex items-center gap-4">
-              
+              {user ? (
+                <Button variant="ghost" size="icon" onClick={() => setShowDataSecurePopup(true)}>
+                  <ShieldCheck className="h-6 w-6 text-green-500" />
+                </Button>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  <a href="/login" className="text-primary hover:underline">Log in</a> to secure your data and explore all features.
+                </p>
+              )}
           </div>
       </header>
 
@@ -468,7 +494,6 @@ export default function DashboardPage() {
                         </AccordionContent>
                         </AccordionItem>
                     </Card>
-
                     </Accordion>
                 </div>
             </ScrollArea>
@@ -532,6 +557,20 @@ export default function DashboardPage() {
             </div>
         </div>
       </main>
+
+      <Dialog open={showDataSecurePopup} onOpenChange={setShowDataSecurePopup}>
+        <DialogContent className="animate-bounce-in">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-6 w-6 text-green-500" />
+              Data Security
+            </DialogTitle>
+            <DialogDescription>
+                Your sensitive information is important. When you upload a document for analysis, we automatically mask personally identifiable information (PII) before it is processed. This means that only the data relevant for legal analysis is used, and your personal details are kept private.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -52,7 +52,7 @@ export const createConversation = async (title: string, firstMessage: { content:
                 content: firstMessage.content,
                 fileUrl: firstMessage.fileUrl || null,
                 fileName: firstMessage.fileName || null,
-                timestamp: serverTimestamp()
+                timestamp: new Date()
             },
         ]
     });
@@ -71,7 +71,7 @@ export const addMessageToConversation = async (conversationId: string, sender: '
             content,
             fileUrl: fileUrl || null,
             fileName: fileName || null,
-            timestamp: serverTimestamp()
+            timestamp: new Date()
         };
         await updateDoc(conversationRef, {
             messages: [...messages, newMessage]

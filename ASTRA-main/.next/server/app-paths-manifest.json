@@ -1,5 +1,6 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
+  "/dashboard/deep-search/page": "app/dashboard/deep-search/page.js",
+  "/dashboard/legal-chatbot/page": "app/dashboard/legal-chatbot/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/jurisdiction/page": "app/jurisdiction/page.js",
